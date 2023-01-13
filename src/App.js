@@ -1,5 +1,5 @@
 import "./App.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { gql, useQuery } from "@apollo/client";
 import Menus from "./components/Menus";
 
@@ -16,6 +16,7 @@ function App() {
   const [todayMain, setTodayMain] = useState("ぎょうざ");
   const [todaySide, setTodaySide] = useState("サラダ");
   const [todayGarnish, settodayGarnish] = useState("みそしる");
+  const [isModalOpen, toggle] = useState(false);
 
   const handlesubmit = () => {
     createMenu();
@@ -26,6 +27,15 @@ function App() {
     // setTodaySide(data.length[Math.floor(Math.random() * data.length)].name);
     // settodayGarnish(data.length[Math.floor(Math.random() * data.length)].name);
   };
+
+  const handleModal = () => {
+    toggle(!isModalOpen);
+    console.log(isModalOpen);
+  };
+
+  useEffect(() => {
+    console.log(isModalOpen);
+  }, [isModalOpen]);
 
   return (
     <>
@@ -39,8 +49,15 @@ function App() {
           <h3>副菜: {todaySide}</h3>
           <h3>付け合わせ: {todayGarnish}</h3>
         </div>
-        <button value='a'>メニューを追加する</button>
-        <div className='modal'>
+        <button onClick={handleModal}>メニューを追加する</button>
+      </div>
+
+      <div className='container'>
+        <Menus />
+      </div>
+
+      <div className={isModalOpen ? "modalOpen" : "modalFalse"}>
+        <div className='overlay'>
           <form onSubmit={handlesubmit}>
             <input placeholder='メニューの種別' />
             <input placeholder='メニュー名' required />
@@ -48,10 +65,6 @@ function App() {
             <input type='submit' />
           </form>
         </div>
-      </div>
-
-      <div className='container'>
-        <Menus />
       </div>
     </>
   );

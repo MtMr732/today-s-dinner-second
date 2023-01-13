@@ -13,8 +13,24 @@
   flex-direction: column;
 }
 
-.modal {
-  display: none;
+.modalOpen .overlay {
+  /* 　画面全体を覆う設定　 */
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50%;
+  height: 50%;
+  background-color: rgba(0, 0, 0, 0.5);
+
+  /*　画面の中央に要素を表示させる設定　*/
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modalFalse {
+  visibility: hidden;
 }
 
 .container {
