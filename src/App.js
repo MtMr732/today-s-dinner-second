@@ -12,21 +12,21 @@ import {
   addDoc,
   updateDoc,
 } from "firebase/firestore";
-import { getStorage, ref, uploadBytes } from "firebase/storage";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBYVxzP5thGHXYU_XnT2OnoVjs5h-bVCcI",
-  authDomain: "today-s-dinner-second.firebaseapp.com",
-  projectId: "today-s-dinner-second",
-  storageBucket: "today-s-dinner-second.appspot.com",
-  messagingSenderId: "1068876473605",
-  appId: "1:1068876473605:web:424273aa4b8e845627036c",
+  apiKey: process.env.REACT_APP_FIREBASE_APIKEY,
+  authDomain: process.env.REACT_APP_FIREBASE_APIKEY,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID,
 };
 
 const app = initializeApp(firebaseConfig);
 
 const db = getFirestore(app);
-const storage = getStorage();
+const storage = getStorage(app);
 
 const App = () => {
   const [todayMain, setTodayMain] = useState("ぎょうざ");
@@ -40,9 +40,7 @@ const App = () => {
   useEffect(() => {
     const menusCollectionRef = collection(db, "menus");
     getDocs(menusCollectionRef).then((querySnapshot) => {
-      // console.log(querySnapshot.docs);
       setMenus(querySnapshot.docs);
-      // querySnapshot.docs.forEach((menu) => console.log(menu.data()));
     });
   }, []);
 
@@ -54,13 +52,31 @@ const App = () => {
 
   const onClickSubmit = async () => {
     const storageRef = ref(storage, `images/${file.name}`);
+    const menuType = document.querySelector("#menu-type").innerHTML;
+    const name = document.querySelector("#menu-name").value;
+    const content = document.querySelector("#menu-content").value;
 
     // 画像のアップロード
     await uploadBytes(storageRef, file).then((snapshot) => {
       console.log("Uploaded a file", snapshot);
     });
 
+    // storageにある画像のパスを取得
+    const gsReference = ref(
+      storage,
+      `${process.env.REACT_APP_ROOT_STORAGE_URL}/images/${file.name}`
+    );
+    let imageURL = await getDownloadURL(gsReference).then((url) => {
+      return url;
+    });
+    console.log(imageURL);
+
     // dbへの保存(名前と内容と画像のパス)
+    await setDoc(doc(db, "menus", `${name}`), {
+      name: name,
+      description: content,
+      imageURL: imageURL,
+    });
   };
 
   const handleModal = () => {
@@ -99,9 +115,9 @@ const App = () => {
 
       <div className={isModalOpen ? "modalOpen" : "modalFalse"}>
         <div className='overlay'></div>
-        <input placeholder='メニューの種別' />
-        <input placeholder='メニュー名' required />
-        <input placeholder='内容' multiple />
+        <input id='menu-type' placeholder='メニューの種別' />
+        <input id='menu-name' placeholder='メニュー名' required />
+        <input id='menu-content' placeholder='内容' multiple />
         <input
           type='file'
           name='imageFile'
@@ -109,7 +125,9 @@ const App = () => {
           onChange={onChangeFile}
         />
         <div className='button'>
-          <button onClick={onClickSubmit} value='送信' />
+          <button onClick={onClickSubmit} value='送信'>
+            送信
+          </button>
         </div>
       </div>
     </>
