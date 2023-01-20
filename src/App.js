@@ -42,7 +42,7 @@ const App = () => {
     getDocs(menusCollectionRef).then((querySnapshot) => {
       setMenus(querySnapshot.docs);
     });
-  }, []);
+  }, [menus]);
 
   // inputタグにファイルが選択された際に発火するメソッド
   const onChangeFile = (e) => {
@@ -77,6 +77,8 @@ const App = () => {
       description: content,
       imageURL: imageURL,
     });
+
+    toggleModal();
   };
 
   const handleModal = () => {
