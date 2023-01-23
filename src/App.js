@@ -29,20 +29,47 @@ const db = getFirestore(app);
 const storage = getStorage(app);
 
 const App = () => {
+  // firestoreから取得したデータを格納する変数
+  const [mainMenus, setMainMenu] = useState(null);
+  const [sideMenus, setSideMenus] = useState(null);
+  const [garnish, setGarnish] = useState(null);
+  // 画面上部の今晩のメニューに利用する変数
   const [todayMain, setTodayMain] = useState("ぎょうざ");
   const [todaySide, setTodaySide] = useState("サラダ");
   const [todayGarnish, settodayGarnish] = useState("みそしる");
+  // その他
   const [isModalOpen, toggleModal] = useState(false);
   const [file, setFile] = useState(null);
-  const [menus, setMenus] = useState(null);
+  const [menutype, setMenutype] = useState("");
+
+  const handleMenutype = (e) => {
+    setMenutype(e.target.value);
+  };
+  useEffect(() => {
+    console.log(menutype);
+  }, [menutype]);
 
   // firestoreからデータを取得する
   useEffect(() => {
-    const menusCollectionRef = collection(db, "menus");
+    const menusCollectionRef = collection(db, "mainMenus");
     getDocs(menusCollectionRef).then((querySnapshot) => {
-      setMenus(querySnapshot.docs);
+      setMainMenu(querySnapshot.docs);
     });
-  }, [menus]);
+  }, [mainMenus]);
+
+  useEffect(() => {
+    const menusCollectionRef = collection(db, "sideMenus");
+    getDocs(menusCollectionRef).then((querySnapshot) => {
+      setSideMenus(querySnapshot.docs);
+    });
+  }, [sideMenus]);
+
+  useEffect(() => {
+    const menusCollectionRef = collection(db, "garnish");
+    getDocs(menusCollectionRef).then((querySnapshot) => {
+      setGarnish(querySnapshot.docs);
+    });
+  }, [garnish]);
 
   // inputタグにファイルが選択された際に発火するメソッド
   const onChangeFile = (e) => {
@@ -52,7 +79,6 @@ const App = () => {
 
   const onClickSubmit = async () => {
     const storageRef = ref(storage, `images/${file.name}`);
-    const menuType = document.querySelector("#menu-type").innerHTML;
     const name = document.querySelector("#menu-name").value;
     const content = document.querySelector("#menu-content").value;
 
@@ -73,7 +99,7 @@ const App = () => {
 
     // dbへの保存(名前と内容と画像のパス)
     // firestoreのパスをmenusからmainmenus（他2種類）に変える
-    await setDoc(doc(db, "menus", `${name}`), {
+    await setDoc(doc(db, `${menutype}`, `${name}`), {
       name: name,
       description: content,
       imageURL: imageURL,
@@ -83,10 +109,14 @@ const App = () => {
   };
 
   const displayMenu = () => {
-    setTodayMain(menus[Math.floor(Math.random() * menus.length)].data().name);
-    setTodaySide(menus[Math.floor(Math.random() * menus.length)].data().name);
+    setTodayMain(
+      mainMenus[Math.floor(Math.random() * mainMenus.length)].data().name
+    );
+    setTodaySide(
+      sideMenus[Math.floor(Math.random() * sideMenus.length)].data().name
+    );
     settodayGarnish(
-      menus[Math.floor(Math.random() * menus.length)].data().name
+      garnish[Math.floor(Math.random() * garnish.length)].data().name
     );
   };
 
@@ -112,21 +142,55 @@ const App = () => {
         </div>
         <button onClick={handleModal}>メニューを追加する</button>
       </div>
+      <div>
+        <h3>メニュー一覧</h3>
+      </div>
       <div className='container'>
-        {menus?.map((menu) => (
-          <div key={menu.id}>
-            <div className='card'>
-              <img src={menu.data().imageURL}></img>
-              <p>{menu.data().name}</p>
-              <p>{menu.data().description}</p>
+        <div id='mainMenus'>
+          <h3>主菜</h3>
+          {mainMenus?.map((menu) => (
+            <div key={menu.id}>
+              <div className='card'>
+                <img src={menu.data().imageURL}></img>
+                <p>{menu.data().name}</p>
+                <p>{menu.data().description}</p>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
+        <div id='sideMenus'>
+          <h3>副菜</h3>
+          {sideMenus?.map((menu) => (
+            <div key={menu.id}>
+              <div className='card'>
+                <img src={menu.data().imageURL}></img>
+                <p>{menu.data().name}</p>
+                <p>{menu.data().description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div id='garnish'>
+          <h3>付け合わせ</h3>
+          {garnish?.map((menu) => (
+            <div key={menu.id}>
+              <div className='card'>
+                <img src={menu.data().imageURL}></img>
+                <p>{menu.data().name}</p>
+                <p>{menu.data().description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className={isModalOpen ? "modalOpen" : "modalFalse"}>
         <div className='overlay'></div>
-        <input id='menu-type' placeholder='メニューの種別' />
+        <input
+          id='menu-type'
+          placeholder='メニューの種別'
+          onChange={(e) => handleMenutype(e)}
+        />
         <input id='menu-name' placeholder='メニュー名' required />
         <input id='menu-content' placeholder='内容' multiple />
         <input
