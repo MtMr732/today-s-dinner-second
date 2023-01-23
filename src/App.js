@@ -72,6 +72,7 @@ const App = () => {
     console.log(imageURL);
 
     // dbへの保存(名前と内容と画像のパス)
+    // firestoreのパスをmenusからmainmenus（他2種類）に変える
     await setDoc(doc(db, "menus", `${name}`), {
       name: name,
       description: content,
@@ -79,6 +80,14 @@ const App = () => {
     });
 
     toggleModal();
+  };
+
+  const displayMenu = () => {
+    setTodayMain(menus[Math.floor(Math.random() * menus.length)].data().name);
+    setTodaySide(menus[Math.floor(Math.random() * menus.length)].data().name);
+    settodayGarnish(
+      menus[Math.floor(Math.random() * menus.length)].data().name
+    );
   };
 
   const handleModal = () => {
@@ -94,7 +103,7 @@ const App = () => {
       <h1 className='title'>today's dinner</h1>
 
       <div className='top'>
-        <button>献立を決める</button>
+        <button onClick={displayMenu}>献立を決める</button>
         <div className='wrapper'>
           <h3>今夜の晩ごはん</h3>
           <h3>メインディッシュ: {todayMain}</h3>
