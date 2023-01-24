@@ -1,7 +1,5 @@
 import "./App.css";
 import { useEffect, useState } from "react";
-import Menus from "./components/Menus";
-
 import { initializeApp } from "firebase/app";
 import {
   getFirestore,
@@ -13,6 +11,12 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { useMediaQuery } from "@mui/material";
+import Grid from "@mui/material/Grid";
+
+import DecideMenu from "./components/DecideMenu";
+import AddMenu from "./components/AddMenu";
+import Menus from "./components/Menus";
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_APIKEY,
@@ -34,13 +38,14 @@ const App = () => {
   const [sideMenus, setSideMenus] = useState(null);
   const [garnish, setGarnish] = useState(null);
   // 画面上部の今晩のメニューに利用する変数
-  const [todayMain, setTodayMain] = useState("ぎょうざ");
-  const [todaySide, setTodaySide] = useState("サラダ");
-  const [todayGarnish, settodayGarnish] = useState("みそしる");
+  const [todayMain, setTodayMain] = useState("");
+  const [todaySide, setTodaySide] = useState("");
+  const [todayGarnish, settodayGarnish] = useState("");
   // その他
   const [isModalOpen, toggleModal] = useState(false);
   const [file, setFile] = useState(null);
   const [menutype, setMenutype] = useState("");
+  const isMatches = useMediaQuery("(max-width:1199px)");
 
   const handleMenutype = (e) => {
     setMenutype(e.target.value);
@@ -105,7 +110,7 @@ const App = () => {
       imageURL: imageURL,
     });
 
-    toggleModal();
+    toggleModal(!isModalOpen);
   };
 
   const displayMenu = () => {
@@ -120,10 +125,6 @@ const App = () => {
     );
   };
 
-  const handleModal = () => {
-    toggleModal(!isModalOpen);
-  };
-
   useEffect(() => {
     console.log(isModalOpen);
   }, [isModalOpen]);
@@ -133,78 +134,39 @@ const App = () => {
       <h1 className='title'>today's dinner</h1>
 
       <div className='top'>
-        <button onClick={displayMenu}>献立を決める</button>
+        <DecideMenu displayMenu={displayMenu} />
         <div className='wrapper'>
           <h3>今夜の晩ごはん</h3>
           <h3>メインディッシュ: {todayMain}</h3>
           <h3>副菜: {todaySide}</h3>
           <h3>付け合わせ: {todayGarnish}</h3>
         </div>
-        <button onClick={handleModal}>メニューを追加する</button>
+        <AddMenu
+          menutype={menutype}
+          handleMenutype={(e) => handleMenutype(e)}
+          onChangeFile={onChangeFile}
+          onClickSubmit={onClickSubmit}
+        />
       </div>
-      <div>
-        <h3>メニュー一覧</h3>
+      <div style={{ margin: 10 }}>
+        <h3>メニュー表</h3>
       </div>
-      <div className='container'>
-        <div id='mainMenus'>
-          <h3>主菜</h3>
-          {mainMenus?.map((menu) => (
-            <div key={menu.id}>
-              <div className='card'>
-                <img src={menu.data().imageURL}></img>
-                <p>{menu.data().name}</p>
-                <p>{menu.data().description}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-        <div id='sideMenus'>
-          <h3>副菜</h3>
-          {sideMenus?.map((menu) => (
-            <div key={menu.id}>
-              <div className='card'>
-                <img src={menu.data().imageURL}></img>
-                <p>{menu.data().name}</p>
-                <p>{menu.data().description}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-        <div id='garnish'>
-          <h3>付け合わせ</h3>
-          {garnish?.map((menu) => (
-            <div key={menu.id}>
-              <div className='card'>
-                <img src={menu.data().imageURL}></img>
-                <p>{menu.data().name}</p>
-                <p>{menu.data().description}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      <Grid container direction='row'>
+        <Grid xs={isMatches ? 12 : 4}>
+          <h4 style={{ margin: 10 }}>主菜</h4>
+          <Menus menus={mainMenus} />
+        </Grid>
+        <Grid xs={isMatches ? 12 : 4}>
+          <h4 style={{ margin: 10 }}>副菜</h4>
+          <Menus menus={sideMenus} />
+        </Grid>
+        <Grid xs={isMatches ? 12 : 4}>
+          <h4 style={{ margin: 10 }}>付け合わせ</h4>
+          <Menus menus={garnish} />
+        </Grid>
+      </Grid>
 
-      <div className={isModalOpen ? "modalOpen" : "modalFalse"}>
-        <div className='overlay'></div>
-        <input
-          id='menu-type'
-          placeholder='メニューの種別'
-          onChange={(e) => handleMenutype(e)}
-        />
-        <input id='menu-name' placeholder='メニュー名' required />
-        <input id='menu-content' placeholder='内容' multiple />
-        <input
-          type='file'
-          name='imageFile'
-          accept='image/*'
-          onChange={onChangeFile}
-        />
-        <div className='button'>
-          <button onClick={onClickSubmit} value='送信'>
-            送信
-          </button>
-        </div>
-      </div>
+      <div id='footer' style={{ height: 30 }}></div>
     </>
   );
 };
