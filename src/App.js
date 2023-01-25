@@ -7,8 +7,6 @@ import {
   doc,
   setDoc,
   getDocs,
-  addDoc,
-  updateDoc,
 } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useMediaQuery } from "@mui/material";
@@ -46,13 +44,6 @@ const App = () => {
   const [file, setFile] = useState(null);
   const [menutype, setMenutype] = useState("");
   const isMatches = useMediaQuery("(max-width:1199px)");
-
-  const handleMenutype = (e) => {
-    setMenutype(e.target.value);
-  };
-  useEffect(() => {
-    console.log(menutype);
-  }, [menutype]);
 
   // firestoreからデータを取得する
   useEffect(() => {
@@ -125,9 +116,9 @@ const App = () => {
     );
   };
 
-  useEffect(() => {
-    console.log(isModalOpen);
-  }, [isModalOpen]);
+  const handleMenutype = (e) => {
+    setMenutype(e.target.value);
+  };
 
   return (
     <>

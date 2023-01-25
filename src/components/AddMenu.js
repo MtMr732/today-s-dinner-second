@@ -29,7 +29,7 @@ const AddMenu = (props) => {
   const handleClose = () => setModalOpen(false);
 
   return (
-    <Stack spacing={2}>
+    <Stack spacing={2} alignItems='center'>
       <Button variant='contained' onClick={handleOpen}>
         メニューを追加
       </Button>
