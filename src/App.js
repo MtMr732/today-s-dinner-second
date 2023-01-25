@@ -42,7 +42,7 @@ const App = () => {
   const [todaySide, setTodaySide] = useState("");
   const [todayGarnish, settodayGarnish] = useState("");
   // その他
-  const [isModalOpen, toggleModal] = useState(false);
+  const [isModalOpen, setModalOpen] = useState(false);
   const [file, setFile] = useState(null);
   const [menutype, setMenutype] = useState("");
   const isMatches = useMediaQuery("(max-width:1199px)");
@@ -110,7 +110,7 @@ const App = () => {
       imageURL: imageURL,
     });
 
-    toggleModal(!isModalOpen);
+    setModalOpen(false);
   };
 
   const displayMenu = () => {
@@ -142,6 +142,8 @@ const App = () => {
           <h3>付け合わせ: {todayGarnish}</h3>
         </div>
         <AddMenu
+          isModalOpen={isModalOpen}
+          setModalOpen={setModalOpen}
           menutype={menutype}
           handleMenutype={(e) => handleMenutype(e)}
           onChangeFile={onChangeFile}

@@ -18,10 +18,15 @@ const style = {
 };
 
 const AddMenu = (props) => {
-  const { handleMenutype, onChangeFile, onClickSubmit } = props;
-  const [open, setOpen] = React.useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const {
+    isModalOpen,
+    setModalOpen,
+    handleMenutype,
+    onChangeFile,
+    onClickSubmit,
+  } = props;
+  const handleOpen = () => setModalOpen(true);
+  const handleClose = () => setModalOpen(false);
 
   return (
     <Stack spacing={2}>
@@ -29,7 +34,7 @@ const AddMenu = (props) => {
         メニューを追加
       </Button>
       <Modal
-        open={open}
+        open={isModalOpen}
         onClose={handleClose}
         aria-labelledby='modal-modal-title'
         aria-describedby='modal-modal-description'
