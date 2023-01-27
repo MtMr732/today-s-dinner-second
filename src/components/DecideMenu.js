@@ -4,8 +4,9 @@ import Button from "@mui/material/Button";
 
 const DecideMenu = (props) => {
   const { displayMenu } = props;
+
   return (
-    <Stack spacing={2} alignItems='center'>
+    <Stack spacing={2} alignItems='center' justifyContent='conter'>
       <Button variant='contained' onClick={displayMenu}>
         献立を決める
       </Button>

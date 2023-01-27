@@ -15,6 +15,7 @@ const style = {
 
 const Menu = (props) => {
   const { menu } = props;
+
   return (
     <Grid item container direction='column' alignItems='center' sx={style}>
       <Avatar

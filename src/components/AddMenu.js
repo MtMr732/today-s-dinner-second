@@ -21,6 +21,7 @@ const AddMenu = (props) => {
   const {
     isModalOpen,
     setModalOpen,
+    menutype,
     handleMenutype,
     onChangeFile,
     onClickSubmit,
@@ -33,14 +34,9 @@ const AddMenu = (props) => {
       <Button variant='contained' onClick={handleOpen}>
         メニューを追加
       </Button>
-      <Modal
-        open={isModalOpen}
-        onClose={handleClose}
-        aria-labelledby='modal-modal-title'
-        aria-describedby='modal-modal-description'
-      >
+      <Modal open={isModalOpen} onClose={handleClose}>
         <Box sx={style}>
-          <Selector handleMenutype={handleMenutype} />
+          <Selector menutype={menutype} handleMenutype={handleMenutype} />
           <TextField
             sx={{ maxWidth: 200 }}
             id='menu-name'

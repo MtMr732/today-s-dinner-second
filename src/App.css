@@ -3,11 +3,6 @@
   color: #ffffff;
 }
 
-.top {
-  display: flex;
-  justify-content: space-around;
-}
-
 .wrapper {
   display: flex;
   flex-direction: column;
