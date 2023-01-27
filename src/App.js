@@ -1,5 +1,4 @@
-import "./App.css";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { initializeApp } from "firebase/app";
 import {
   getFirestore,
@@ -9,12 +8,12 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { useMediaQuery } from "@mui/material";
+import { Box, Typography, useMediaQuery } from "@mui/material";
 import Grid from "@mui/material/Grid";
 
 import DecideMenu from "./components/DecideMenu";
 import AddMenu from "./components/AddMenu";
-import Menus from "./components/Menus";
+import MenuList from "./components/MenuList";
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_APIKEY,
@@ -51,21 +50,21 @@ const App = () => {
     getDocs(menusCollectionRef).then((querySnapshot) => {
       setMainMenu(querySnapshot.docs);
     });
-  }, [mainMenus]);
+  }, []);
 
   useEffect(() => {
     const menusCollectionRef = collection(db, "sideMenus");
     getDocs(menusCollectionRef).then((querySnapshot) => {
       setSideMenus(querySnapshot.docs);
     });
-  }, [sideMenus]);
+  }, []);
 
   useEffect(() => {
     const menusCollectionRef = collection(db, "garnish");
     getDocs(menusCollectionRef).then((querySnapshot) => {
       setGarnish(querySnapshot.docs);
     });
-  }, [garnish]);
+  }, []);
 
   // inputタグにファイルが選択された際に発火するメソッド
   const onChangeFile = (e) => {
@@ -101,6 +100,17 @@ const App = () => {
       imageURL: imageURL,
     });
 
+    // データを送信後にstateを更新する処理をここで追加し、再レンダリングしている
+    getDocs(collection(db, "mainMenus")).then((querySnapshot) => {
+      setMainMenu(querySnapshot.docs);
+    });
+    getDocs(collection(db, "sideMenus")).then((querySnapshot) => {
+      setSideMenus(querySnapshot.docs);
+    });
+    getDocs(collection(db, "garnish")).then((querySnapshot) => {
+      setGarnish(querySnapshot.docs);
+    });
+
     setModalOpen(false);
   };
 
@@ -122,16 +132,26 @@ const App = () => {
 
   return (
     <>
-      <h1 className='title'>today's dinner</h1>
-
-      <div className='top'>
+      <Typography
+        variant='h4'
+        sx={{ backgroundColor: "#dcc2ff", color: "#ffffff" }}
+      >
+        today's dinner
+      </Typography>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-around",
+          alignItems: "center",
+        }}
+      >
         <DecideMenu displayMenu={displayMenu} />
-        <div className='wrapper'>
+        <Box sx={{ flexDirection: "column" }}>
           <h3>今夜の晩ごはん</h3>
           <h3>メインディッシュ: {todayMain}</h3>
           <h3>副菜: {todaySide}</h3>
           <h3>付け合わせ: {todayGarnish}</h3>
-        </div>
+        </Box>
         <AddMenu
           isModalOpen={isModalOpen}
           setModalOpen={setModalOpen}
@@ -140,26 +160,26 @@ const App = () => {
           onChangeFile={onChangeFile}
           onClickSubmit={onClickSubmit}
         />
-      </div>
-      <div style={{ margin: 10 }}>
+      </Box>
+      <Box style={{ margin: 10 }}>
         <h3>メニュー表</h3>
-      </div>
+      </Box>
       <Grid container direction='row'>
-        <Grid xs={isMatches ? 12 : 4}>
+        <Grid item xs={isMatches ? 12 : 4}>
           <h4 style={{ margin: 10 }}>主菜</h4>
-          <Menus menus={mainMenus} />
+          <MenuList menus={mainMenus} />
         </Grid>
-        <Grid xs={isMatches ? 12 : 4}>
+        <Grid item xs={isMatches ? 12 : 4}>
           <h4 style={{ margin: 10 }}>副菜</h4>
-          <Menus menus={sideMenus} />
+          <MenuList menus={sideMenus} />
         </Grid>
-        <Grid xs={isMatches ? 12 : 4}>
+        <Grid item xs={isMatches ? 12 : 4}>
           <h4 style={{ margin: 10 }}>付け合わせ</h4>
-          <Menus menus={garnish} />
+          <MenuList menus={garnish} />
         </Grid>
       </Grid>
 
-      <div id='footer' style={{ height: 30 }}></div>
+      <Box id='footer' style={{ height: 30 }}></Box>
     </>
   );
 };
