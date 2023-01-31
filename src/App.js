@@ -28,43 +28,45 @@ const app = initializeApp(firebaseConfig);
 
 const db = getFirestore(app);
 const storage = getStorage(app);
+// 本来は別ファイルに書き出す
+const useFetch = (path) => {
+  const [data, setData] = useState(null);
+  const [randomNumber, setRandomNumber] = useState(0);
+  const update = () => {
+    setRandomNumber(Math.random());
+  };
+  useEffect(() => {
+    const menusCollectionRef = collection(db, path);
+    getDocs(menusCollectionRef).then((querySnapshot) => {
+      setData(querySnapshot.docs);
+    });
+  }, [randomNumber]);
+
+  return { data, update };
+};
 
 const App = () => {
   // firestoreから取得したデータを格納する変数
-  const [mainMenus, setMainMenu] = useState(null);
-  const [sideMenus, setSideMenus] = useState(null);
-  const [garnish, setGarnish] = useState(null);
+  const { data: mainMenus, update: updateMainmenu } = useFetch("mainMenus");
+  const { data: sideMenus, update: updateSidemenu } = useFetch("sideMenus");
+  const { data: garnish, update: updateGarnish } = useFetch("garnish");
   // 画面上部の今晩のメニューに利用する変数
-  const [todayMain, setTodayMain] = useState("");
-  const [todaySide, setTodaySide] = useState("");
-  const [todayGarnish, settodayGarnish] = useState("");
+  const [result, setResult] = useState({});
+  const displayMenu = () => {
+    const main =
+      mainMenus[Math.floor(Math.random() * mainMenus.length)].data().name;
+    const side =
+      sideMenus[Math.floor(Math.random() * sideMenus.length)].data().name;
+    const garni =
+      garnish[Math.floor(Math.random() * garnish.length)].data().name;
+    setResult({ main, side, garni });
+    console.log(result);
+  };
   // その他
   const [isModalOpen, setModalOpen] = useState(false);
   const [file, setFile] = useState(null);
   const [menutype, setMenutype] = useState("");
   const isMatches = useMediaQuery("(max-width:1199px)");
-
-  // firestoreからデータを取得する
-  useEffect(() => {
-    const menusCollectionRef = collection(db, "mainMenus");
-    getDocs(menusCollectionRef).then((querySnapshot) => {
-      setMainMenu(querySnapshot.docs);
-    });
-  }, []);
-
-  useEffect(() => {
-    const menusCollectionRef = collection(db, "sideMenus");
-    getDocs(menusCollectionRef).then((querySnapshot) => {
-      setSideMenus(querySnapshot.docs);
-    });
-  }, []);
-
-  useEffect(() => {
-    const menusCollectionRef = collection(db, "garnish");
-    getDocs(menusCollectionRef).then((querySnapshot) => {
-      setGarnish(querySnapshot.docs);
-    });
-  }, []);
 
   // inputタグにファイルが選択された際に発火するメソッド
   const onChangeFile = (e) => {
@@ -101,29 +103,11 @@ const App = () => {
     });
 
     // データを送信後にstateを更新する処理をここで追加し、再レンダリングしている
-    getDocs(collection(db, "mainMenus")).then((querySnapshot) => {
-      setMainMenu(querySnapshot.docs);
-    });
-    getDocs(collection(db, "sideMenus")).then((querySnapshot) => {
-      setSideMenus(querySnapshot.docs);
-    });
-    getDocs(collection(db, "garnish")).then((querySnapshot) => {
-      setGarnish(querySnapshot.docs);
-    });
+    updateMainmenu();
+    updateSidemenu();
+    updateGarnish();
 
     setModalOpen(false);
-  };
-
-  const displayMenu = () => {
-    setTodayMain(
-      mainMenus[Math.floor(Math.random() * mainMenus.length)].data().name
-    );
-    setTodaySide(
-      sideMenus[Math.floor(Math.random() * sideMenus.length)].data().name
-    );
-    settodayGarnish(
-      garnish[Math.floor(Math.random() * garnish.length)].data().name
-    );
   };
 
   const handleMenutype = (e) => {
@@ -148,9 +132,9 @@ const App = () => {
         <DecideMenu displayMenu={displayMenu} />
         <Box sx={{ flexDirection: "column" }}>
           <h3>今夜の晩ごはん</h3>
-          <h3>メインディッシュ: {todayMain}</h3>
-          <h3>副菜: {todaySide}</h3>
-          <h3>付け合わせ: {todayGarnish}</h3>
+          <h3>メインディッシュ: {result.main}</h3>
+          <h3>副菜: {result.side}</h3>
+          <h3>付け合わせ: {result.garni}</h3>
         </Box>
         <AddMenu
           isModalOpen={isModalOpen}
